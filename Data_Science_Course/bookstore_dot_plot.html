@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bookstore Genre Dot Plot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 40px;
+      max-width: 820px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    p.subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+    svg {
+      display: block;
+      margin: 0 auto;
+      overflow: visible;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bookstore Inventory — Books by Genre</h1>
+    <p class="subtitle">Each ● represents 1 book on hand</p>
+
+    <svg id="dotplot" width="720" height="440"></svg>
+  </div>
+
+  <script>
+    const data = [
+      { genre: "Mystery",      count: 20 },
+      { genre: "Western",      count: 18 },
+      { genre: "Non Fiction",  count: 35 },
+      { genre: "Fiction",      count: 20 },
+      { genre: "Teen Fiction", count: 15 },
+      { genre: "Biography",    count: 22 },
+      { genre: "Science",      count: 15 },
+      { genre: "Math",         count: 25 },
+    ];
+
+    const colors = [
+      "#e74c3c","#e67e22","#2ecc71","#3498db",
+      "#9b59b6","#1abc9c","#f39c12","#2980b9"
+    ];
+
+    const svg      = document.getElementById("dotplot");
+    const svgW     = 720;
+    const svgH     = 440;
+    const marginL  = 90;   // left margin for labels
+    const marginR  = 30;
+    const marginT  = 20;
+    const marginB  = 60;   // bottom margin for x-axis labels
+    const plotW    = svgW - marginL - marginR;
+    const plotH    = svgH - marginT - marginB;
+
+    const maxVal   = 40;   // x-axis max
+    const tickStep = 5;
+    const dotR     = 7;
+    const rowH     = plotH / data.length;
+
+    function ns(tag) {
+      return document.createElementNS("http://www.w3.org/2000/svg", tag);
+    }
+    function xPos(val) {
+      return marginL + (val / maxVal) * plotW;
+    }
+    function yCenter(i) {
+      return marginT + i * rowH + rowH / 2;
+    }
+
+    // Grid lines + x-axis ticks
+    for (let v = 0; v <= maxVal; v += tickStep) {
+      const x = xPos(v);
+
+      // vertical grid line
+      const grid = ns("line");
+      grid.setAttribute("x1", x); grid.setAttribute("y1", marginT);
+      grid.setAttribute("x2", x); grid.setAttribute("y2", marginT + plotH);
+      grid.setAttribute("stroke", v === 0 ? "#aaa" : "#e0e0e0");
+      grid.setAttribute("stroke-width", v === 0 ? 1.5 : 1);
+      svg.appendChild(grid);
+
+      // tick label
+      const lbl = ns("text");
+      lbl.setAttribute("x", x);
+      lbl.setAttribute("y", marginT + plotH + 20);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("font-size", "13");
+      lbl.setAttribute("fill", "#555");
+      lbl.textContent = v;
+      svg.appendChild(lbl);
+    }
+
+    // X-axis label
+    const axisLbl = ns("text");
+    axisLbl.setAttribute("x", marginL + plotW / 2);
+    axisLbl.setAttribute("y", svgH - 8);
+    axisLbl.setAttribute("text-anchor", "middle");
+    axisLbl.setAttribute("font-size", "14");
+    axisLbl.setAttribute("fill", "#333");
+    axisLbl.setAttribute("font-weight", "bold");
+    axisLbl.textContent = "Number of Books";
+    svg.appendChild(axisLbl);
+
+    // Rows: genre label + dots
+    data.forEach((d, i) => {
+      const cy = yCenter(i);
+      const color = colors[i];
+
+      // Row background (alternating)
+      if (i % 2 === 0) {
+        const bg = ns("rect");
+        bg.setAttribute("x", marginL);
+        bg.setAttribute("y", marginT + i * rowH);
+        bg.setAttribute("width", plotW);
+        bg.setAttribute("height", rowH);
+        bg.setAttribute("fill", "#f7f7f7");
+        bg.setAttribute("rx", 4);
+        svg.appendChild(bg);
+      }
+
+      // Genre label
+      const lbl = ns("text");
+      lbl.setAttribute("x", marginL - 10);
+      lbl.setAttribute("y", cy + 5);
+      lbl.setAttribute("text-anchor", "end");
+      lbl.setAttribute("font-size", "13");
+      lbl.setAttribute("fill", "#2c3e50");
+      lbl.setAttribute("font-weight", "600");
+      lbl.textContent = d.genre;
+      svg.appendChild(lbl);
+
+      // Draw one dot per book, spaced along the x-axis
+      for (let k = 1; k <= d.count; k++) {
+        const cx = xPos(k);
+        const circle = ns("circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        circle.setAttribute("r", dotR);
+        circle.setAttribute("fill", color);
+        circle.setAttribute("opacity", "0.85");
+        svg.appendChild(circle);
+      }
+
+      // Count label after the last dot
+      const countLbl = ns("text");
+      countLbl.setAttribute("x", xPos(d.count) + dotR + 5);
+      countLbl.setAttribute("y", cy + 5);
+      countLbl.setAttribute("font-size", "12");
+      countLbl.setAttribute("fill", color);
+      countLbl.setAttribute("font-weight", "bold");
+      countLbl.textContent = d.count;
+      svg.appendChild(countLbl);
+    });
+  </script>
+</body>
+</html>
