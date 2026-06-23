@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Regression Line — Running vs Weight</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 30px 20px;
+      color: #2c3e50;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    p.subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      padding: 36px 40px;
+      margin-bottom: 30px;
+    }
+    .card h2 {
+      font-size: 17px;
+      margin-top: 0;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 8px;
+      color: #2980b9;
+    }
+    svg { display: block; margin: 0 auto; overflow: visible; }
+
+    /* Math section */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+    table.data-table th {
+      background: #3498db;
+      color: white;
+      padding: 8px 12px;
+      text-align: center;
+    }
+    table.data-table td {
+      border: 1px solid #ddd;
+      padding: 7px 12px;
+      text-align: center;
+    }
+    table.data-table tr:nth-child(even) td { background: #f7f9fc; }
+    table.data-table tr.total-row td {
+      background: #eaf4fb;
+      font-weight: bold;
+      border-top: 2px solid #3498db;
+    }
+
+    .formula-block {
+      background: #f0f7ff;
+      border-left: 4px solid #3498db;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 14px 0;
+      font-size: 15px;
+      line-height: 1.9;
+    }
+    .formula-block .step-label {
+      font-weight: bold;
+      color: #2980b9;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .highlight {
+      background: #d4edff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #1a6496;
+    }
+    .result-box {
+      background: #2ecc71;
+      color: white;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 18px;
+      letter-spacing: 0.5px;
+    }
+    .legend {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-top: 16px;
+      font-size: 13px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 7px; }
+    .legend-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #e74c3c;
+    }
+    .legend-line {
+      width: 28px; height: 3px;
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Scatter Plot with Regression Line</h1>
+  <p class="subtitle">Weekly Running Minutes vs. Weight (lbs)</p>
+
+  <!-- CHART CARD -->
+  <div class="card">
+    <h2>Scatter Plot &amp; Regression Line</h2>
+    <svg id="chart" width="720" height="420"></svg>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot"></div> Data Points</div>
+      <div class="legend-item"><div class="legend-line"></div> Regression Line: ŷ = 0.042x + 175.57</div>
+    </div>
+  </div>
+
+  <!-- MATH CARD -->
+  <div class="card">
+    <h2>Linear Regression — Step-by-Step Math</h2>
+
+    <p>Using the <strong>least squares method</strong>, we find the line <em>ŷ = bx + a</em> that best fits the data, where:</p>
+    <ul style="font-size:14px; line-height:2;">
+      <li><strong>b</strong> (slope) = (Σxy − n·x̄·ȳ) / (Σx² − n·x̄²)</li>
+      <li><strong>a</strong> (y-intercept) = ȳ − b·x̄</li>
+    </ul>
+
+    <p><strong>Step 1 — Data Table</strong></p>
+    <table class="data-table">
+      <thead>
+        <tr><th>x (min)</th><th>y (lbs)</th><th>xy</th><th>x²</th></tr>
+      </thead>
+      <tbody id="data-tbody"></tbody>
+    </table>
+
+    <div class="formula-block">
+      <span class="step-label">Step 2 — Compute Means</span>
+      n = 8<br>
+      x̄ = Σx / n = 505 / 8 = <span class="highlight">63.125</span><br>
+      ȳ = Σy / n = 1426 / 8 = <span class="highlight">178.25</span>
+    </div>
+
+    <div class="formula-block">
+      <span class="step-label">Step 3 — Compute Slope (b)</span>
+      b = (Σxy − n·x̄·ȳ) / (Σx² − n·x̄²)<br>
+      b = (90,061 − 8 × 63.125 × 178.25) / (32,933 − 8 × 63.125²)<br>
+      b = (90,061 − 90,016.25) / (32,933 − 31,878.125)<br>
+      b = 44.75 / 1,054.875<br>
+      b ≈ <span class="highlight">0.042</span>
+    </div>
+
+    <div class="formula-block">
+      <span class="step-label">Step 4 — Compute Y-Intercept (a)</span>
+      a = ȳ − b·x̄<br>
+      a = 178.25 − (0.042 × 63.125)<br>
+      a = 178.25 − 2.651<br>
+      a ≈ <span class="highlight">175.57</span>
+    </div>
+
+    <div class="result-box">
+      Regression Line:&nbsp;&nbsp; ŷ = 0.042x + 175.57
+    </div>
+
+    <p style="font-size:13px; color:#666; margin-top:18px;">
+      <strong>Interpretation:</strong> For each additional minute of running per week, weight increases by approximately 0.042 lbs.
+      The very small slope and tight weight range (176–180 lbs) suggest a <em>weak positive correlation</em> in this dataset —
+      other variables likely have a stronger influence on weight.
+    </p>
+  </div>
+</div>
+
+<script>
+  const rawData = [
+    { x: 90, y: 180 },
+    { x: 50, y: 178 },
+    { x: 60, y: 179 },
+    { x: 70, y: 177 },
+    { x: 62, y: 180 },
+    { x: 55, y: 179 },
+    { x: 58, y: 177 },
+    { x: 60, y: 176 },
+  ];
+
+  // ── Regression constants ────────────────────────────────────
+  const b = 44.75 / 1054.875;   // ≈ 0.04243
+  const a = 178.25 - b * 63.125; // ≈ 175.57
+
+  // ── Populate data table ─────────────────────────────────────
+  const tbody = document.getElementById("data-tbody");
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+  rawData.forEach(d => {
+    sumX += d.x; sumY += d.y;
+    sumXY += d.x * d.y; sumX2 += d.x * d.x;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${d.x}</td><td>${d.y}</td><td>${d.x * d.y}</td><td>${d.x * d.x}</td>`;
+    tbody.appendChild(tr);
+  });
+  const totRow = document.createElement("tr");
+  totRow.className = "total-row";
+  totRow.innerHTML = `<td>Σx = ${sumX}</td><td>Σy = ${sumY}</td><td>Σxy = ${sumXY.toLocaleString()}</td><td>Σx² = ${sumX2.toLocaleString()}</td>`;
+  tbody.appendChild(totRow);
+
+  // ── Draw chart ───────────────────────────────────────────────
+  const svg    = document.getElementById("chart");
+  const W = 720, H = 420;
+  const mL = 70, mR = 30, mT = 20, mB = 55;
+  const pW = W - mL - mR, pH = H - mT - mB;
+
+  const xMin = 44, xMax = 96;   // minutes axis
+  const yMin = 174, yMax = 182; // weight axis
+
+  function ns(tag) { return document.createElementNS("http://www.w3.org/2000/svg", tag); }
+  function px(v)   { return mL + (v - xMin) / (xMax - xMin) * pW; }
+  function py(v)   { return mT + (1 - (v - yMin) / (yMax - yMin)) * pH; }
+
+  // grid + axes
+  function gridLine(x1,y1,x2,y2,color,w) {
+    const l = ns("line");
+    [["x1",x1],["y1",y1],["x2",x2],["y2",y2],
+     ["stroke",color],["stroke-width",w]].forEach(([k,v]) => l.setAttribute(k,v));
+    svg.appendChild(l);
+  }
+
+  // x-axis ticks every 5 minutes
+  for (let v = 45; v <= 95; v += 5) {
+    const x = px(v);
+    gridLine(x, mT, x, mT+pH, v%10===0 ? "#d0d0d0" : "#eee", v%10===0?1:0.6);
+    const t = ns("text");
+    t.setAttribute("x", x); t.setAttribute("y", mT+pH+18);
+    t.setAttribute("text-anchor","middle"); t.setAttribute("font-size","12"); t.setAttribute("fill","#555");
+    t.textContent = v;
+    svg.appendChild(t);
+  }
+
+  // y-axis ticks every 1 lb
+  for (let v = 175; v <= 181; v++) {
+    const y = py(v);
+    gridLine(mL, y, mL+pW, y, "#e0e0e0", 1);
+    const t = ns("text");
+    t.setAttribute("x", mL-8); t.setAttribute("y", y+4);
+    t.setAttribute("text-anchor","end"); t.setAttribute("font-size","12"); t.setAttribute("fill","#555");
+    t.textContent = v;
+    svg.appendChild(t);
+  }
+
+  // axes border
+  gridLine(mL, mT, mL, mT+pH, "#aaa", 1.5);
+  gridLine(mL, mT+pH, mL+pW, mT+pH, "#aaa", 1.5);
+
+  // axis labels
+  function axisLabel(x,y,text,rotate) {
+    const t = ns("text");
+    t.setAttribute("x",x); t.setAttribute("y",y);
+    t.setAttribute("text-anchor","middle");
+    t.setAttribute("font-size","13"); t.setAttribute("fill","#333"); t.setAttribute("font-weight","bold");
+    if (rotate) t.setAttribute("transform", `rotate(-90,${x},${y})`);
+    t.textContent = text;
+    svg.appendChild(t);
+  }
+  axisLabel(mL + pW/2, H - 8, "Minutes Running per Week");
+  axisLabel(18, mT + pH/2, "Weight (lbs)", true);
+
+  // regression line
+  const x1r = xMin, x2r = xMax;
+  const y1r = a + b * x1r, y2r = a + b * x2r;
+  const rl = ns("line");
+  [["x1",px(x1r)],["y1",py(y1r)],["x2",px(x2r)],["y2",py(y2r)],
+   ["stroke","#2980b9"],["stroke-width","2.5"],["stroke-dasharray","6,3"]].forEach(([k,v]) => rl.setAttribute(k,v));
+  svg.appendChild(rl);
+
+  // data points
+  rawData.forEach(d => {
+    const c = ns("circle");
+    c.setAttribute("cx", px(d.x)); c.setAttribute("cy", py(d.y));
+    c.setAttribute("r", "7"); c.setAttribute("fill","#e74c3c");
+    c.setAttribute("stroke","white"); c.setAttribute("stroke-width","2");
+    svg.appendChild(c);
+
+    const tip = ns("title"); tip.textContent = `(${d.x} min, ${d.y} lbs)`; c.appendChild(tip);
+  });
+
+  // regression line label
+  const lbl = ns("text");
+  lbl.setAttribute("x", px(xMax)-4); lbl.setAttribute("y", py(y2r)-10);
+  lbl.setAttribute("text-anchor","end"); lbl.setAttribute("font-size","12");
+  lbl.setAttribute("fill","#2980b9"); lbl.setAttribute("font-weight","bold");
+  lbl.textContent = "ŷ = 0.042x + 175.57";
+  svg.appendChild(lbl);
+</script>
+</body>
+</html>
