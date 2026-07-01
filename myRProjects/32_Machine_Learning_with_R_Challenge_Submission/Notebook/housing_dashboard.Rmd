@@ -1,0 +1,64 @@
+---
+title: "California Housing Dashboard"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    theme: bootstrap
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+library(flexdashboard)
+library(ggplot2)
+library(dplyr)
+library(scales)
+
+housing <- read.csv("../Input/housing.csv")
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Homes by Ocean Proximity
+
+```{r}
+proximity_counts <- housing %>%
+  count(ocean_proximity, name = "homes") %>%
+  arrange(desc(homes))
+
+ggplot(proximity_counts, aes(x = reorder(ocean_proximity, -homes), y = homes, fill = ocean_proximity)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = comma(homes)), vjust = -0.4, size = 4) +
+  scale_y_continuous(labels = comma, expand = expansion(mult = c(0, 0.12))) +
+  labs(x = "Ocean Proximity", y = "Number of Homes") +
+  theme_minimal(base_size = 13)
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Population vs. Households
+
+```{r}
+ggplot(housing, aes(x = households, y = population)) +
+  geom_point(alpha = 0.4, color = "#2c7fb8") +
+  geom_smooth(method = "lm", color = "firebrick", se = FALSE) +
+  scale_x_continuous(labels = comma) +
+  scale_y_continuous(labels = comma) +
+  labs(x = "Households", y = "Population") +
+  theme_minimal(base_size = 13)
+```
+
+### Total Rooms vs. Total Bedrooms
+
+```{r}
+ggplot(housing, aes(x = total_bedrooms, y = total_rooms)) +
+  geom_point(alpha = 0.4, color = "#31a354") +
+  geom_smooth(method = "lm", color = "firebrick", se = FALSE) +
+  scale_x_continuous(labels = comma) +
+  scale_y_continuous(labels = comma) +
+  labs(x = "Total Bedrooms", y = "Total Rooms") +
+  theme_minimal(base_size = 13)
+```
