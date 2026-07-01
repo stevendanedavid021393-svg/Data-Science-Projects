@@ -1,0 +1,4 @@
+Model comparison (RMSE, lower is better):
+  Linear model (5-fold CV):  $83,629
+  Random forest (OOB):       $49,232
+  Random forest (test set):  $47,703
